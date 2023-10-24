@@ -10,9 +10,6 @@ import { Tooltip, Snackbar } from '@mui/material';
 import { downloadCSV } from '../ChartUtils';
 import { getRendererForValue, rendererForType, RenderSubValue } from '../../report/ReportRecordProcessing';
 
-import { Close } from '@mui/icons-material';
-import { extensionEnabled } from '../../extensions/ExtensionUtils';
-
 import {
   getRule,
   executeActionRule,
@@ -21,9 +18,10 @@ import {
 } from '../../extensions/advancedcharts/Utils';
 
 import { IconButton } from '@neo4j-ndl/react';
-import { CloudArrowDownIconOutline } from '@neo4j-ndl/react/icons';
+import { CloudArrowDownIconOutline, XMarkIconOutline } from '@neo4j-ndl/react/icons';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Button from '@mui/material/Button';
+import { extensionEnabled } from '../../utils/ReportUtils';
 
 const TABLE_HEADER_HEIGHT = 32;
 const TABLE_FOOTER_HEIGHT = 62;
@@ -33,6 +31,7 @@ const HIDDEN_COLUMN_PREFIX = '__';
 const theme = createTheme({
   typography: {
     fontFamily: "'Nunito Sans', sans-serif !important",
+    allVariants: { color: 'rgb(var(--palette-neutral-text-default))' },
   },
 });
 const fallbackRenderer = (value) => {
@@ -114,19 +113,19 @@ export const NeoTableChart = (props: ChartProps) => {
   const actionableFields = actionsRules.map((r) => r.field);
 
   const columns = transposed
-    ? ['Field'].concat(records.map((r, j) => `Value${j == 0 ? '' : ` ${(j + 1).toString()}`}`)).map((key, i) => {
-        const value = key;
+    ? [records[0].keys[0]].concat(records.map((record) => record._fields[0]?.toString() || '')).map((key, i) => {
+        const uniqueKey = `${String(key)}_${i}`;
         return ApplyColumnType(
           {
             key: `col-key-${i}`,
-            field: generateSafeColumnKey(key),
+            field: generateSafeColumnKey(uniqueKey),
             headerName: generateSafeColumnKey(key),
             headerClassName: 'table-small-header',
             disableColumnSelector: true,
             flex: columnWidths && i < columnWidths.length ? columnWidths[i] : 1,
             disableClickEventBubbling: true,
           },
-          value,
+          key,
           actionableFields.includes(key)
         );
       })
@@ -166,15 +165,32 @@ export const NeoTableChart = (props: ChartProps) => {
     ...columns.filter((x) => x.field.startsWith(HIDDEN_COLUMN_PREFIX)).map((x) => ({ [x.field]: false }))
   );
 
+  const getTransposedRows = (records) => {
+    // Skip first key
+    const rowKeys = [...records[0].keys];
+    rowKeys.shift();
+
+    // Add values in rows
+    const rowsWithValues = rowKeys.map((key, i) =>
+      Object.assign(
+        { id: i, Field: key },
+        ...records.map((record, j) => ({
+          [`${record._fields[0]}_${j + 1}`]: RenderSubValue(record._fields[i + 1]),
+        }))
+      )
+    );
+
+    // Add field in rows
+    const rowsWithFieldAndValues = rowsWithValues.map((row, i) => ({
+      ...row,
+      [`${records[0].keys[0]}_${0}`]: rowKeys[i],
+    }));
+
+    return rowsWithFieldAndValues;
+  };
+
   const rows = transposed
-    ? records[0].keys.map((key, i) => {
-        return Object.assign(
-          { id: i, Field: key },
-          ...records.map((r, j) => ({
-            [`Value${j == 0 ? '' : ` ${(j + 1).toString()}`}`]: RenderSubValue(r._fields[i]),
-          }))
-        );
-      })
+    ? getTransposedRows(records)
     : records.map((record, rownumber) => {
         return Object.assign(
           { id: rownumber },
@@ -203,8 +219,14 @@ export const NeoTableChart = (props: ChartProps) => {
           message='Value copied to clipboard.'
           action={
             <React.Fragment>
-              <IconButton size='small' aria-label='close' color='inherit' onClick={() => setNotificationOpen(false)}>
-                <Close fontSize='small' />
+              <IconButton
+                size='small'
+                aria-label='close'
+                color='inherit'
+                onClick={() => setNotificationOpen(false)}
+                clean
+              >
+                <XMarkIconOutline />
               </IconButton>
             </React.Fragment>
           }
@@ -247,20 +269,25 @@ export const NeoTableChart = (props: ChartProps) => {
             }
           }}
           pageSize={tablePageSize > 0 ? tablePageSize : 5}
-          rowsPerPageOptions={[5]}
+          rowsPerPageOptions={rows.length < 5 ? [rows.length, 5] : [5]}
           disableSelectionOnClick
           components={{
             ColumnSortedDescendingIcon: () => <></>,
             ColumnSortedAscendingIcon: () => <></>,
           }}
           getRowClassName={(params) => {
-            return `rule${evaluateRulesOnDict(params.row, styleRules, ['row color', 'row text color'])}`;
+            return ['row color', 'row text color']
+              .map((e) => {
+                return `rule${evaluateRulesOnDict(params.row, styleRules, [e])}`;
+              })
+              .join(' ');
           }}
           getCellClassName={(params) => {
-            return `rule${evaluateRulesOnDict({ [params.field]: params.value }, styleRules, [
-              'cell color',
-              'cell text color',
-            ])}`;
+            return ['cell color', 'cell text color']
+              .map((e) => {
+                return `rule${evaluateRulesOnDict({ [params.field]: params.value }, styleRules, [e])}`;
+              })
+              .join(' ');
           }}
         />
       </div>

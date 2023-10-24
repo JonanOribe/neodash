@@ -1,7 +1,7 @@
 import { ChatCompletionRequestMessage, ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from 'openai';
 import { reportTypesToDesc, reportExampleQueries } from '../const';
 import { ModelClient } from '../ModelClient';
-import { Status } from '../../component/ClientSettings';
+import { Status } from '../../util/Status';
 
 const consoleLogAsync = async (message: string, other?: any) => {
   await new Promise((resolve) => setTimeout(resolve, 0)).then(() => console.info(message, other));
@@ -83,6 +83,7 @@ export class OpenAiClient extends ModelClient {
       consoleLogAsync('Error while loading the model list: ', e);
       res = [];
     }
+    this.setListAvailableModels(res);
     return res;
   }
 
@@ -117,7 +118,7 @@ export class OpenAiClient extends ModelClient {
     let queryExample = reportExampleQueries[reportType];
     let finalMessage = `${content}. Please use the following query structure as an example for ${reportTypesToDesc[reportType]}:
   ${queryExample} 
-  Remember to respect the schema and remove any unnecessary comments or explanations from your result.`;
+  Remember to respect the schema and remove any unnecessary comments or explanations from your result. Remember that every $ prefixed word is a parameter.`;
     return { role: ChatCompletionRequestMessageRoleEnum.User, content: plain ? content : finalMessage };
   }
 

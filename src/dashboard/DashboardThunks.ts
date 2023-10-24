@@ -4,31 +4,23 @@ import { addPage, movePage, removePage, resetDashboardState, setDashboard } from
 import { runCypherQuery } from '../report/ReportQueryRunner';
 import { setParametersToLoadAfterConnecting, setWelcomeScreenOpen } from '../application/ApplicationActions';
 import { updateGlobalParametersThunk, updateParametersToNeo4jTypeThunk } from '../settings/SettingsThunks';
+import { createUUID } from '../utils/uuid';
 import { fetchDashboardFromHive } from '../solutions/launch/launch';
-
-// TODO move this to a generic utils file
-export function createUUID() {
-  let dt = new Date().getTime();
-  let uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    let r = (dt + Math.random() * 16) % 16 | 0;
-    dt = Math.floor(dt / 16);
-    return (c == 'x' ? r : (r & 0x3) | 0x8).toString(16);
-  });
-  return uuid;
-}
 
 export const removePageThunk = (number) => (dispatch: any, getState: any) => {
   try {
     const numberOfPages = getState().dashboard.pages.length;
-
+    const pageIndex = getState().dashboard.settings.pagenumber;
     if (numberOfPages == 1) {
       dispatch(createNotificationThunk('Cannot remove page', "You can't remove the only page of a dashboard."));
       return;
     }
-    if (number >= numberOfPages - 1) {
-      dispatch(updateDashboardSetting('pagenumber', Math.max(0, numberOfPages - 2)));
-    }
+
     dispatch(removePage(number));
+
+    if (number <= pageIndex) {
+      dispatch(updateDashboardSetting('pagenumber', Math.max(pageIndex - 1)));
+    }
   } catch (e) {
     dispatch(createNotificationThunk('Unable to remove page', e));
   }
@@ -46,8 +38,13 @@ export const addPageThunk = () => (dispatch: any, getState: any) => {
 
 export const movePageThunk = (oldIndex: number, newIndex: number) => (dispatch: any, getState: any) => {
   try {
-    if (getState().dashboard.settings.pagenumber == oldIndex) {
+    const pageIndex = getState().dashboard.settings.pagenumber;
+    if (pageIndex == oldIndex) {
       dispatch(updateDashboardSetting('pagenumber', newIndex));
+    } else if (oldIndex > pageIndex && pageIndex >= newIndex) {
+      dispatch(updateDashboardSetting('pagenumber', pageIndex + 1));
+    } else if (oldIndex < pageIndex && pageIndex <= newIndex) {
+      dispatch(updateDashboardSetting('pagenumber', pageIndex - 1));
     }
     dispatch(movePage(oldIndex, newIndex));
   } catch (e) {
@@ -268,7 +265,14 @@ export const loadDashboardFromNeo4jByNameThunk = (driver, database, name, callba
               'A dashboard with the provided name could not be found.'
             )
           );
+          return;
         }
+
+        if (records[0].error) {
+          dispatch(createNotificationThunk('Unable to load dashboard.', records[0].error));
+          return;
+        }
+
         callback(records[0]._fields[0]);
       }
     );

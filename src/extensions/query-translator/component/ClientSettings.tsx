@@ -11,21 +11,16 @@ import {
   setModelProvider,
 } from '../state/QueryTranslatorActions';
 import {
-  PlayCircleIconSolid,
   CheckCircleIconSolid,
-  PlayIconSolid,
   ExclamationTriangleIconSolid,
+  PlayCircleIconSolid,
+  PlayIconSolid,
 } from '@neo4j-ndl/react/icons';
 import { Button, IconButton } from '@neo4j-ndl/react';
 import { modelClientInitializationThunk } from '../state/QueryTranslatorThunks';
+import { Status } from '../util/Status';
 
 const update = (state, mutations) => Object.assign({}, state, mutations);
-
-export enum Status {
-  NOT_AUTHENTICATED,
-  AUTHENTICATED,
-  ERROR,
-}
 
 // TODO: the following
 // 1. the settings modal should save only when all the required fields are defined and we can correctly authenticate
@@ -118,6 +113,7 @@ export const ClientSettings = ({
   // Prevent authentication if all required fields are not full (EX: look at checkIfDisabled)
   const authButton = (
     <IconButton
+      key={'auth-setting'}
       aria-label='connect'
       onClick={(e) => {
         e.preventDefault();
@@ -152,7 +148,7 @@ export const ClientSettings = ({
         .map((setting) => {
           let disabled = checkIfDisabled(setting);
           return (
-            <ListItem style={{ padding: 0 }}>
+            <ListItem key={`list-${setting}`} style={{ padding: 0 }}>
               <NeoSetting
                 key={setting}
                 style={{ marginLeft: 0, marginRight: 0 }}

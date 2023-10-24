@@ -43,10 +43,10 @@ export default function NeoConnectionModal({
   const discoveryAPIUrl = ssoSettings && ssoSettings.ssoDiscoveryUrl;
 
   return (
-    <div>
+    <>
       <Dialog
         size='small'
-        open={open == true}
+        open={open}
         onClose={() => {
           dismissable ? onConnectionModalClose() : null;
         }}
@@ -142,7 +142,6 @@ export default function NeoConnectionModal({
             <TextInput
               id='dbusername'
               value={username}
-              disabled={standalone}
               onChange={(e) => setUsername(e.target.value)}
               label='Username'
               placeholder='neo4j'
@@ -160,7 +159,6 @@ export default function NeoConnectionModal({
               <TextInput
                 id='dbpassword'
                 value={password}
-                disabled={standalone}
                 onChange={(e) => setPassword(e.target.value)}
                 label='Password'
                 placeholder='neo4j'
@@ -190,6 +188,7 @@ export default function NeoConnectionModal({
                   // Remember credentials on click
                   setConnectionProperties(protocol, url, port, database, '', '');
                 }}
+                providers={ssoSettings.ssoProviders}
               />
             ) : (
               <Button
@@ -231,11 +230,11 @@ export default function NeoConnectionModal({
           ) : (
             <div style={{ color: 'lightgrey' }}>
               Enter your Neo4j database credentials to start. Don't have a Neo4j database yet? Create your own in&nbsp;
-              <TextLink externalLink className='n-text-light-neutral-text-inverse' href='https://neo4j.com/download/'>
+              <TextLink externalLink className='n-text-neutral-text-inverse' href='https://neo4j.com/download/'>
                 Neo4j Desktop
               </TextLink>
               , or try the&nbsp;
-              <TextLink externalLink className='n-text-light-neutral-text-inverse' href='https://console.neo4j.io/'>
+              <TextLink externalLink className='n-text-neutral-text-inverse' href='https://console.neo4j.io/'>
                 Neo4j Aura
               </TextLink>
               &nbsp;free tier.
@@ -243,6 +242,6 @@ export default function NeoConnectionModal({
           )}
         </Dialog.Actions>
       </Dialog>
-    </div>
+    </>
   );
 }

@@ -10,7 +10,6 @@ import {
 import { getReportTypes } from '../../extensions/ExtensionUtils';
 import { RULE_BASED_REPORT_ACTIONS_CUSTOMIZATIONS } from '../../extensions/actions/ActionsRuleCreationModal';
 import NeoCustomReportActionsModal from '../../extensions/actions/ActionsRuleCreationModal';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import { AdjustmentsHorizontalIconOutline, SparklesIconOutline } from '@neo4j-ndl/react/icons';
 import { IconButton, Switch } from '@neo4j-ndl/react';
 
@@ -19,6 +18,7 @@ const update = (state, mutations) => Object.assign({}, state, mutations);
 const NeoCardSettingsFooter = ({
   type,
   fields,
+  schema,
   reportSettings,
   reportSettingsOpen,
   extensions,
@@ -124,6 +124,7 @@ const NeoCardSettingsFooter = ({
           settingValue={reportSettings[settingToCustomize]}
           type={type}
           fields={fields}
+          schema={schema}
           customReportStyleModalOpen={customReportStyleModalOpen}
           setCustomReportStyleModalOpen={setCustomReportStyleModalOpen}
           onReportSettingUpdate={onReportSettingUpdate}
@@ -149,7 +150,6 @@ const NeoCardSettingsFooter = ({
       <table
         style={{
           borderTop: '1px dashed lightgrey',
-          background: reportSettingsOpen ? '#f6f6f6' : 'inherit',
           width: '100%',
         }}
       >

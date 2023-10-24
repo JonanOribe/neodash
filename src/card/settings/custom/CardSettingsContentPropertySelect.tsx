@@ -6,19 +6,10 @@ import { QueryStatus, runCypherQuery } from '../../../report/ReportQueryRunner';
 import { Neo4jContext, Neo4jContextState } from 'use-neo4j/dist/neo4j.context';
 import { Autocomplete, debounce, TextField } from '@mui/material';
 import NeoField from '../../../component/field/Field';
-import { getReportTypes } from '../../../extensions/ExtensionUtils';
 import { Dropdown } from '@neo4j-ndl/react';
 import NeoCodeEditorComponent from '../../../component/editor/CodeEditorComponent';
 
-const NeoCardSettingsContentPropertySelect = ({
-  query,
-  type,
-  database,
-  settings,
-  extensions,
-  onReportSettingUpdate,
-  onQueryUpdate,
-}) => {
+const NeoCardSettingsContentPropertySelect = ({ query, database, settings, onReportSettingUpdate, onQueryUpdate }) => {
   const { driver } = useContext<Neo4jContextState>(Neo4jContext);
   if (!driver) {
     throw new Error(
@@ -199,7 +190,8 @@ const NeoCardSettingsContentPropertySelect = ({
   // TODO: since this component is only rendered for parameter select, this is technically not needed
   const parameterSelectTypes = ['Node Property', 'Relationship Property', 'Free Text', 'Custom Query', 'Date Picker'];
   const selectedType = settings.type ? settings.type : 'Node Property';
-  const reportTypes = getReportTypes(extensions);
+  const helperText = settings?.helperText || '';
+  const inputMode = settings?.inputMode || 'cypher';
   const overridePropertyDisplayName =
     settings.overridePropertyDisplayName !== undefined ? settings.overridePropertyDisplayName : false;
 
@@ -213,7 +205,7 @@ const NeoCardSettingsContentPropertySelect = ({
   return (
     <div>
       <p style={{ color: 'grey', fontSize: 12, paddingLeft: '5px', border: '1px solid lightgrey', marginTop: '0px' }}>
-        {reportTypes[type].helperText}
+        {helperText}
       </p>
       <Dropdown
         id='type'
@@ -237,7 +229,7 @@ const NeoCardSettingsContentPropertySelect = ({
           value={settings.entityType ? settings.entityType : ''}
           defaultValue={''}
           placeholder={'Enter a parameter name here...'}
-          style={{ width: 335, marginLeft: '5px', marginTop: '13px' }}
+          style={{}}
           onChange={(value) => {
             setLabelInputText(value);
             handleNodeLabelSelectionUpdate(value);
@@ -253,7 +245,7 @@ const NeoCardSettingsContentPropertySelect = ({
               value={settings?.entityType || ''}
               defaultValue={''}
               placeholder={'Enter a parameter name here...'}
-              style={{ width: 350, marginLeft: '5px', marginTop: '0px' }}
+              style={{}}
               onChange={(value) => {
                 setLabelInputText(value);
                 handleNodeLabelSelectionUpdate(value);
@@ -261,12 +253,11 @@ const NeoCardSettingsContentPropertySelect = ({
               }}
             />
             <br />
-            <br />
             <div style={{ display: labelInputText ? 'inherit' : 'none' }}>
               <NeoCodeEditorComponent
                 value={queryText}
                 editable={true}
-                language={reportTypes[type] && reportTypes[type].inputMode ? reportTypes[type].inputMode : 'cypher'}
+                language={inputMode}
                 onChange={(value) => {
                   debouncedQueryUpdate(value);
                   setQueryText(value);
@@ -301,7 +292,7 @@ const NeoCardSettingsContentPropertySelect = ({
                 : labelRecords.map((r) => (r._fields ? r._fields[0] : '(no data)'))
             }
             getOptionLabel={(option) => option || ''}
-            style={{ width: 350, marginLeft: '5px', marginTop: '13px' }}
+            style={{ marginTop: '13px' }}
             inputValue={labelInputText}
             onInputChange={(event, value) => {
               setLabelInputText(value);
@@ -344,7 +335,7 @@ const NeoCardSettingsContentPropertySelect = ({
                     : propertyRecords.map((r) => (r._fields ? r._fields[0] : '(no data)'))
                 }
                 getOptionLabel={(option) => (option ? option : '')}
-                style={{ display: 'inline-block', width: 170, marginLeft: '5px', marginTop: '13px' }}
+                style={{ display: 'inline-block', width: '65%', marginTop: '13px', marginRight: '5%' }}
                 inputValue={propertyInputText}
                 onInputChange={(event, value) => {
                   setPropertyInputText(value);
@@ -374,13 +365,14 @@ const NeoCardSettingsContentPropertySelect = ({
               {overridePropertyDisplayName ? (
                 <Autocomplete
                   id='autocomplete-property-display'
+                  size={'small'}
                   options={
                     manualPropertyNameSpecification
                       ? [settings.propertyTypeDisplay || settings.propertyType]
                       : propertyRecords.map((r) => (r._fields ? r._fields[0] : '(no data)'))
                   }
                   getOptionLabel={(option) => (option ? option : '')}
-                  style={{ display: 'inline-block', width: 170, marginLeft: '5px', marginTop: '13px' }}
+                  style={{ display: 'inline-block', width: '65%', marginTop: '13px', marginRight: '5%' }}
                   inputValue={propertyInputDisplayText}
                   onInputChange={(event, value) => {
                     setPropertyInputDisplayText(value);
@@ -408,14 +400,14 @@ const NeoCardSettingsContentPropertySelect = ({
               ) : (
                 <></>
               )}
-              <NeoField
+              <TextField
                 placeholder='number'
                 label='Number (optional)'
                 disabled={!settings.propertyType}
                 value={settings.id}
-                style={{ width: '170px', marginTop: '13px', marginLeft: '5px' }}
-                onChange={(value) => {
-                  handleIdSelectionUpdate(value);
+                style={{ width: '30%', display: 'inline-block', marginTop: '13px' }}
+                onChange={(e) => {
+                  handleIdSelectionUpdate(e.target.value);
                 }}
                 size={'small'}
               />

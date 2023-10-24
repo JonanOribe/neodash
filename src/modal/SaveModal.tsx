@@ -1,28 +1,19 @@
 import React, { useContext, useEffect } from 'react';
 import { FormControl, TextareaAutosize, Tooltip } from '@mui/material';
-import { withStyles } from '@mui/styles';
 import { connect } from 'react-redux';
 import { getDashboardJson } from './ModalSelectors';
 import { valueIsArray, valueIsObject } from '../chart/ChartUtils';
 import { applicationGetConnection } from '../application/ApplicationSelectors';
 import { loadDatabaseListFromNeo4jThunk, saveDashboardToNeo4jThunk } from '../dashboard/DashboardThunks';
 import { Neo4jContext, Neo4jContextState } from 'use-neo4j/dist/neo4j.context';
-import { SideNavigationItem } from '@neo4j-ndl/react';
 import {
   CloudArrowDownIconOutline,
   DatabaseAddCircleIcon,
   DocumentArrowDownIconOutline,
   BackspaceIconOutline,
 } from '@neo4j-ndl/react/icons';
-import { Button, Checkbox, Dialog, Dropdown } from '@neo4j-ndl/react';
+import { Button, Checkbox, Dialog, Dropdown, MenuItem } from '@neo4j-ndl/react';
 import SaveToHiveModal from '../solutions/components/SaveToHiveModal';
-
-/**
- * A modal to save a dashboard as a JSON text string.
- * The button to open the modal is intended to use in a drawer at the side of the page.
- */
-
-const styles = {};
 
 /**
  * Removes the specified set of keys from the nested dictionary.
@@ -50,13 +41,12 @@ const filterNestedDict = (value: any, removedKeys: any[]) => {
   return value;
 };
 
-export const NeoSaveModal = ({
-  dashboard,
-  connection,
-  saveDashboardToNeo4j,
-  loadDatabaseListFromNeo4j,
-  navItemClass,
-}) => {
+/**
+ * A modal to save a dashboard as a JSON text string.
+ * The button to open the modal is intended to use in a drawer at the side of the page.
+ */
+
+export const NeoSaveModal = ({ dashboard, connection, saveDashboardToNeo4j, loadDatabaseListFromNeo4j }) => {
   const [saveModalOpen, setSaveModalOpen] = React.useState(false);
   const [saveToNeo4jModalOpen, setSaveToNeo4jModalOpen] = React.useState(false);
   const [saveToHiveModalOpen, setSaveToHiveModalOpen] = React.useState(false);
@@ -99,14 +89,10 @@ export const NeoSaveModal = ({
   };
 
   return (
-    <div>
-      <Tooltip title='Save' aria-label='save' disableInteractive>
-        <SideNavigationItem onClick={handleClickOpen} icon={<CloudArrowDownIconOutline className={navItemClass} />}>
-          Save
-        </SideNavigationItem>
-      </Tooltip>
+    <>
+      <MenuItem title='Save' onClick={handleClickOpen} icon={<CloudArrowDownIconOutline />} />
 
-      <Dialog size='large' open={saveModalOpen == true} onClose={handleClose} aria-labelledby='form-dialog-title'>
+      <Dialog size='large' open={saveModalOpen} onClose={handleClose} aria-labelledby='form-dialog-title'>
         <Dialog.Header id='form-dialog-title'>
           <CloudArrowDownIconOutline className='icon-base icon-inline text-r' aria-label={'save cloud'} />
           Save Dashboard
@@ -251,7 +237,7 @@ export const NeoSaveModal = ({
           }
         }}
       />
-    </div>
+    </>
   );
 };
 
@@ -267,4 +253,4 @@ const mapDispatchToProps = (dispatch) => ({
   loadDatabaseListFromNeo4j: (driver, callback) => dispatch(loadDatabaseListFromNeo4jThunk(driver, callback)),
 });
 
-export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(NeoSaveModal));
+export default connect(mapStateToProps, mapDispatchToProps)(NeoSaveModal);

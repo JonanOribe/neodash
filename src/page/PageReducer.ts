@@ -6,7 +6,7 @@ import {
   FORCE_REFRESH_PAGE,
   UPDATE_ALL_CARD_POSITIONS_IN_PAGE,
 } from './PageActions';
-import { createUUID } from '../dashboard/DashboardThunks';
+import { createUUID } from '../utils/uuid';
 
 const update = (state, mutations) => Object.assign({}, state, mutations);
 
@@ -43,7 +43,7 @@ export const FIRST_PAGE_INITIAL_STATE = {
 };
 
 export const PAGE_INITIAL_STATE = {
-  title: '',
+  title: 'New page',
   reports: [],
 };
 

@@ -140,6 +140,11 @@ export function getRecordType(value) {
       return 'objectNumber';
     }
     return 'object';
+  } else if (typeof value === 'string' || value instanceof String) {
+    if (value.startsWith('http') || value.startsWith('https')) {
+      return 'link';
+    }
+    return 'string';
   }
 
   // Use string as default type
@@ -247,7 +252,6 @@ export const downloadComponentAsImage = (ref) => {
 
 import { QueryResult, Record as Neo4jRecord } from 'neo4j-driver';
 import { RenderSubValue } from '../report/ReportRecordProcessing';
-import { DEFAULT_NODE_LABELS } from '../config/ReportConfig';
 
 /**
  * Function to cast a value received from the Neo4j Driver to its TS native type
@@ -442,3 +446,5 @@ export function getSelectionBasedOnFields(fields, oldSelection = {}, autoAssignS
   });
   return selection;
 }
+
+export const DEFAULT_NODE_LABELS = ['name', 'title', 'label', 'id', 'uid', '(label)'];

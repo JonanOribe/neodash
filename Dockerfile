@@ -45,4 +45,4 @@ USER nginx
 EXPOSE $NGINX_PORT
 
 HEALTHCHECK cmd curl --fail "http://localhost:$NGINX_PORT" || exit 1
-LABEL version="2.3.0"
+LABEL version="2.3.5"

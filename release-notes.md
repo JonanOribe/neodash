@@ -1,29 +1,13 @@
-## NeoDash 2.3.0
-NeoDash 2.3 is out! This release brings a brand new look-and-feel, improved speed for large dashboards, and a new extension for querying Neo4j with natural language (using LLMs).
+## NeoDash 2.3.5
+This is a bugfix / stability release directly following 2.3.4.
 
-Highlights:
-- Write **[Natural Language Queries](https://neo4j.com/labs/neodash/2.3/user-guide/extensions/natural-language-queries/)** and use OpenAI to generate Cypher queries for your visualizations. (OpenAI API key required)
-- UI updated to use the **[Neo4j Design Language](https://www.neo4j.design/)**, giving NeoDash a similar look-and-feel to other Neo4j tools.
-- Customize branding, colors dynamically with a new [Style Configuration File](https://neo4j.com/labs/neodash/2.3/developer-guide/style-configuration).
-  
-Other changes:
-- Fixed issues with date picker / free-text parameter sometimes not initializing.
-- Improved documentation by fixing broken links, and adding more details around complex concepts. 
-- **Pro Extensions have evolved to open Expert Extensions.**
-- Fixed issue where deep-linked parameters were not set from the URL.
-- Added option to specify absolute width for table columns (in pixels or as percentages).
-- Fixed map charts to auto-cluster markers when they collide, or are too close together.
-- ... and dozens of other improvements!
-
-
-
-Contributors to this release:
-- [Alfredo Rubin](https://github.com/alfredorubin96)
-- [Harold Agudelo](https://github.com/BennuFire)
-- [Aleksandar Simeunovic](https://github.com/AleSim94)
-- [Marius Conjeaud](https://github.com/mariusconjeaud)
-- [Brahm Prakash Mishra](https://github.com/brahmprakashMishra)
-- [Pierre Martignon](https://github.com/pierremartignon)
-- [Kim Zachariassen](https://github.com/KiZach)
-- [Paolo Baldini](https://github.com/8Rav3n)
-- [Niels de Jong](https://github.com/nielsdejong/)
+Improvements:
+- Fixed issue where orphan relationships prevented graph charts from working ([@BennuFire](https://github.com/BennuFire), [#586](https://github.com/neo4j-labs/neodash/pull/586))
+- Fix issue where only one style rule was used a time on tables. ([@BennuFire](https://github.com/BennuFire), [#632](https://github.com/neo4j-labs/neodash/pull/632))
+- Added information about source and target on Graph Chart information modal . ([@BennuFire](https://github.com/BennuFire), [#627](https://github.com/neo4j-labs/neodash/pull/627)) Based on [@brahmprakashMishra](https://github.com/brahmprakashMishra) PR
+- Fixed issue where bar charts where displaying black bars instead of scheme colors. ([@BennuFire](https://github.com/BennuFire), [#626](https://github.com/neo4j-labs/neodash/pull/626))
+- Added right subpath replacement on shared links redirection while in self deployments. ([@m-o-n-i-s-h](https://github.com/m-o-n-i-s-h), [#618](https://github.com/neo4j-labs/neodash/pull/618))
+- Dark theme tweaks. ([@BennuFire](https://github.com/BennuFire), [#585](https://github.com/neo4j-labs/neodash/pull/585))
+- Fixed parameter selector search where numbers were not found and sporadically displayed with decimal points. ([@BennuFire](https://github.com/BennuFire), [#633](https://github.com/neo4j-labs/neodash/pull/633))
+- Added a configuration in order to list sso providers to be used whenever a database has more than one configured. ([@BennuFire](https://github.com/BennuFire), [#624](https://github.com/neo4j-labs/neodash/pull/624))
+- Added 'Ignore undefined parameters' advanced setting support for optional parameters on a query. Now queries will assume a null value instead of returning the error 'Parameter not defined'.  ([@BennuFire](https://github.com/BennuFire), [#625](https://github.com/neo4j-labs/neodash/pull/625))

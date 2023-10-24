@@ -2,10 +2,11 @@ import { ResponsiveBar, ResponsiveBarCanvas } from '@nivo/bar';
 import React, { useEffect } from 'react';
 import { NoDrawableDataErrorMessage } from '../../component/editor/CodeViewerComponent';
 import { getD3ColorsByScheme } from '../../config/ColorConfig';
-import { extensionEnabled } from '../../extensions/ExtensionUtils';
 import { evaluateRulesOnDict, useStyleRules } from '../../extensions/styling/StyleRuleEvaluator';
 import { ChartProps } from '../Chart';
 import { convertRecordObjectToString, recordToNative } from '../ChartUtils';
+import { themeNivo, themeNivoCanvas } from '../Utils';
+import { extensionEnabled } from '../../utils/ReportUtils';
 
 /**
  * Embeds a BarReport (from Nivo) into NeoDash.
@@ -27,7 +28,7 @@ const NeoBarChart = (props: ChartProps) => {
 
   const { records, selection } = props;
 
-  const [keys, setKeys] = React.useState({});
+  const [keys, setKeys] = React.useState<string[]>([]);
   const [data, setData] = React.useState<Record<string, any>[]>([]);
 
   useEffect(() => {
@@ -71,7 +72,7 @@ const NeoBarChart = (props: ChartProps) => {
         return row;
       });
 
-    setKeys(newKeys);
+    setKeys(Object.keys(newKeys));
     setData(newData);
   }, [selection]);
 
@@ -113,8 +114,8 @@ const NeoBarChart = (props: ChartProps) => {
   const chartColorsByScheme = getD3ColorsByScheme(colorScheme);
   // Compute bar color based on rules - overrides default color scheme completely.
   const getBarColor = (bar) => {
-    let { data, id } = bar;
-    let colorIndex = Object.keys(data).indexOf(id);
+    let { id } = bar;
+    let colorIndex = keys.indexOf(id);
     if (colorIndex >= chartColorsByScheme.length) {
       colorIndex %= chartColorsByScheme.length;
     }
@@ -207,15 +208,17 @@ const NeoBarChart = (props: ChartProps) => {
   };
 
   const extraProperties = positionLabel == 'off' ? {} : { barComponent: BarComponent };
-  const BarChartComponent = data.length > 30 ? ResponsiveBarCanvas : ResponsiveBar;
+  const canvas = data.length > 30;
+  const BarChartComponent = canvas ? ResponsiveBarCanvas : ResponsiveBar;
   const chart = (
     <BarChartComponent
+      theme={canvas ? themeNivoCanvas(props.theme) : themeNivo}
       data={data}
       key={`${selection.index}___${selection.value}`}
       layout={layout}
       groupMode={groupMode == 'stacked' ? 'stacked' : 'grouped'}
       enableLabel={enableLabel}
-      keys={Object.keys(keys)}
+      keys={keys}
       indexBy='index'
       margin={{
         top: marginTop,
