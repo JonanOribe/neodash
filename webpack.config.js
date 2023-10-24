@@ -68,6 +68,10 @@ module.exports = (env) => {
     devServer: {
       port: 3000,
       hot: true,
+      // https://stackoverflow.com/questions/31945763/how-to-tell-webpack-dev-server-to-serve-index-html-for-any-route
+      historyApiFallback: {
+        index: 'index.html',
+      },
       compress: true,
       client: {
         overlay: {
